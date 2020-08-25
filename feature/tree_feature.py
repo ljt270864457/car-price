@@ -2,13 +2,23 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
+import os
 import pandas as pd
 from category_encoders import TargetEncoder
 from libs.common import my_agg, reduce_mem_usage, clean_error_month
 
-df_train = pd.read_csv('./data/used_car_train_20200313.csv', sep=' ')
+data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'user_data')
+
+train_path = os.path.join(data_dir, 'used_car_train_20200313.csv')
+test_path = os.path.join(data_dir, 'used_car_testB_20200421.csv')
+
+output_train = os.path.join(output_dir, 'train_tree.csv')
+output_test = os.path.join(output_dir, 'test_tree.csv')
+
+df_train = pd.read_csv(train_path, sep=' ')
 df_train['is_train'] = 1
-df_test = pd.read_csv('./data/used_car_testB_20200421.csv', sep=' ')
+df_test = pd.read_csv(test_path, sep=' ')
 df_test['is_train'] = 0
 
 date_feature = ['regDate', 'creatDate']
@@ -166,6 +176,6 @@ df_train = reduce_mem_usage(df_train)
 df_test = reduce_mem_usage(df_test)
 
 # 输出特征
-df_train.to_csv('user_data/train_tree.csv', index=False)
-df_test.to_csv('user_data/test_tree.csv', index=False)
+df_train.to_csv(output_train, index=False)
+df_test.to_csv(output_test, index=False)
 print('树模型特征工程已完成')

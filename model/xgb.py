@@ -3,10 +3,11 @@ import pickle
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from xgboost.sklearn import XGBRegressor
 from matplotlib import pyplot
 import matplotlib.pyplot as plt
+from bayes_opt import BayesianOptimization
 
 data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'user_data')
 model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
@@ -53,7 +54,6 @@ def train():
     # print(clf.best_score)
     # print(clf.best_iteration)
 
-
     eval_result = clf.evals_result()
     print(eval_result)
 
@@ -89,12 +89,13 @@ def learning_curve_plot():
     pyplot.show()
 
 
-# learning_curve_plot()
-model = load_model()
-print(model.feature_importances_)
-# df_test = pd.read_csv(test_data_path)
-# price = np.exp(model.predict(df_test.values))
-# saleID = np.array(range(200000, 250000))
-# df = pd.DataFrame({'SaleID': saleID, 'price': price})
-# print(df.head())
-# df.to_csv(output_path, index=False)
+if __name__ == '__main__':
+    # learning_curve_plot()
+    model = load_model()
+    print(model.feature_importances_)
+    df_test = pd.read_csv(test_data_path)
+    price = np.exp(model.predict(df_test.values, ntree_limit=model.best_ntree_limit))
+    # saleID = np.array(range(200000, 250000))
+    # df = pd.DataFrame({'SaleID': saleID, 'price': price})
+    # print(df.head())
+    # df.to_csv(output_path, index=False)

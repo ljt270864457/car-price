@@ -4,6 +4,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import mean_absolute_error, make_scorer
 from xgboost.sklearn import XGBRegressor
 from matplotlib import pyplot
 import matplotlib.pyplot as plt
@@ -19,29 +20,32 @@ model_path = os.path.join(model_dir, 'xgb.pkl')
 output_path = os.path.join(output_dir, 'xgb.csv')
 
 
+def my_score(y_predict, y_true):
+    '''
+    自定义评估指标
+    :return:
+    '''
+    score = - mean_absolute_error(np.exp(y_true), np.exp(y_predict))
+    return 'exp_mae', score
+
+
 def train():
     df = pd.read_csv(data_path)
     print(df.head())
     y = df.pop('price').values
     X = df.values
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=2020)
-    print(X_train.shape)
-    print(y_train.shape)
-    print(X_test.shape)
-    print(y_test.shape)
 
     param_dist = {
-        "n_estimators": 30000,
+        "n_estimators": 50000,
         "objective": "reg:squarederror",
-        "eval_metric": "mae",
-        "learning_rate": 0.25,
-        "gamma": 0,  # 损失值大于gamma才能继续分割
-        "min_child_weight": 1,  # 最小叶子结点权重
-        "max_depth": 6,
-        "colsample_bytree": 0.6,
-        "subsample": 0.6,
-        "reg_lambda": 5,  # L2 norm
-        "reg_alpha": 0,  # L1 norm
+        # "eval_metric": "mae",
+        "learning_rate": 0.25,  # [0.03~0.3]
+        "gamma": 0,  # 损失值大于gamma才能继续分割[0~0.5]
+        "min_child_weight": 1,  # 最小叶子结点权重 [20~200]
+        "max_depth": 6,  # [4~10]
+        "colsample_bytree": 0.6,  # [0.3~1]
+        "subsample": 0.6,  # [0.3~1]
         "early_stopping_rounds": 50,
         "tree_method": "gpu_hist",
         "gpu_id": 0
@@ -50,9 +54,9 @@ def train():
     clf = XGBRegressor(**param_dist)
 
     print('开始训练。。。')
-    clf.fit(X_train, y_train, eval_set=[(X_train, y_train), (X_test, y_test)])
-    # print(clf.best_score)
-    # print(clf.best_iteration)
+    clf.fit(X_train, y_train, eval_set=[(X_train, y_train), (X_test, y_test)], eval_metric=my_score)
+    print(clf.best_score)
+    print(clf.best_iteration)
 
     eval_result = clf.evals_result()
     print(eval_result)

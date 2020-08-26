@@ -3,6 +3,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 import os
+import numpy as np
 import pandas as pd
 from category_encoders import TargetEncoder
 from libs.common import my_agg, reduce_mem_usage, clean_error_month
@@ -73,6 +74,8 @@ print(df_train.shape)
 df = pd.concat([df_train, df_test], axis=0)
 df.head()
 
+# 租金要做log变换
+df['price'] = np.log(df['price'])
 # 开始特征工程处理
 df['name_count'] = df.groupby('name')['SaleID'].transform('count')
 name_price_df = my_agg(df[df['is_train'] == 1], 'name')

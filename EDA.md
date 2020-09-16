@@ -78,6 +78,13 @@ df_test['notRepairedDamage'].replace('-', np.nan, inplace=True)
 - 【gearbox】 miss_count:1910,miss_rate:0.0382
 - 【notRepairedDamage】 miss_count:8031,miss_rate:0.16062
 
+# 缺失数据填充
+按照类别租金均值最相似的进行填充
+bodyType补1
+fuelType补2
+gearbox补0
+notRepairedDamage补1
+
 ## 删除异常特征
 由于训练集和测试集的【seller】【offerType】字段只有1个枚举值，所以可以直接删除
 ```
